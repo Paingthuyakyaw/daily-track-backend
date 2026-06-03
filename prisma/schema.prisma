@@ -22,3 +22,11 @@ model User {
   createDate DateTime @default(now())
 }
 
+model Note {
+  id        String   @id @default(uuid())
+  title     String?
+  content   String
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+}
+
