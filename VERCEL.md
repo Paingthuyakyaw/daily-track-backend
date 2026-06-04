@@ -8,9 +8,13 @@ Commit and push this repo to GitHub (or GitLab / Bitbucket).
 
 1. Go to [vercel.com/new](https://vercel.com/new)
 2. Import the repository
-3. Framework Preset: **Other** (build uses `vercel.json`)
-4. Root Directory: `.` (project root)
-5. **Output Directory:** leave empty or set to `public` (must match `vercel.json`; the `public/` folder is required by Vercel even though all routes rewrite to the Nest API)
+3. Framework Preset: **Other**
+4. Root Directory: `.`
+5. **Build Command:** leave empty (use `vercel.json` → `pnpm run vercel-build`)
+6. **Output Directory:** `public` (must match `vercel.json`)
+7. **Install Command:** leave empty (uses `pnpm install` from `vercel.json`)
+
+If the dashboard overrides build settings, clear them so `vercel.json` controls the build.
 
 ## 3. Environment variables
 
@@ -29,10 +33,10 @@ Apply to **Production**, **Preview**, and **Build** (build runs `prisma migrate 
 
 Click **Deploy**. Build steps:
 
-- `pnpm install`
-- `prisma generate`
+- `pnpm install` (+ `postinstall` → `prisma generate`)
 - `prisma migrate deploy`
-- `nest build`
+- `tsc` compile (faster than `nest build` on Vercel)
+- deploy `public/` + serverless `api/index.ts`
 
 ## 5. URLs
 
@@ -54,4 +58,6 @@ vercel --prod
 
 - Use a **connection-pooled** `DATABASE_URL` on serverless (direct Postgres can exhaust connections).
 - Cold starts: first request after idle may be slower (~few seconds).
-- Hobby plan: function `maxDuration` is capped at 10s; upgrade or lower in `vercel.json` if deploy fails.
+- Hobby plan: function `maxDuration` is capped at 10s (already set in `vercel.json`).
+- **Build hangs at `nest build`:** fixed by using `tsc` instead in `vercel-build`.
+- **`No Output Directory named "public"`:** add/commit the `public/` folder (included in repo).
