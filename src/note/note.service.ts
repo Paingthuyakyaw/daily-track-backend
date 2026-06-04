@@ -4,36 +4,17 @@ import {
   NotFoundException,
 } from '@nestjs/common';
 import { marked } from 'marked';
-import * as languageTool from 'node-languagetool';
 import { PrismaService } from 'src/prisma/prisma.service';
 import { CheckGrammarDto } from './dto/check-grammar.dto';
 import { CreateNoteDto } from './dto/create-note.dto';
-
-type LanguageToolResult = {
-  code: number;
-  matches: Array<{
-    offset: number;
-    length: number;
-    message: string;
-    shortMessage: string;
-    replacements: string[];
-    ruleId: string;
-    ruleDescription: string;
-    ruleIssueType: string;
-    ruleCategoryId: string;
-    ruleCategoryName: string;
-  }>;
-};
-
-const runGrammarCheck = (
-  text: string,
-  language: string,
-): Promise<LanguageToolResult> =>
-  languageTool.check(text, language) as Promise<LanguageToolResult>;
+import { GrammarService } from './grammar.service';
 
 @Injectable()
 export class NoteService {
-  constructor(private readonly prisma: PrismaService) {}
+  constructor(
+    private readonly prisma: PrismaService,
+    private readonly grammarService: GrammarService,
+  ) {}
 
   async checkGrammar(dto: CheckGrammarDto) {
     const text = dto.text?.trim();
@@ -43,16 +24,16 @@ export class NoteService {
 
     const language = dto.language?.trim() || 'en-US';
     const plainText = this.stripMarkdown(text);
-    const result = await runGrammarCheck(plainText, language);
+    const matches = await this.grammarService.check(plainText, language);
 
     return {
       language,
       text: plainText,
-      matches: result.matches,
+      matches,
     };
   }
 
-  async createNote(dto: CreateNoteDto) {
+  async createNote(userId: string, dto: CreateNoteDto) {
     const markdown = dto.markdown?.trim();
     if (!markdown) {
       throw new BadRequestException('markdown is required');
@@ -65,6 +46,7 @@ export class NoteService {
       data: {
         title,
         content: markdown,
+        userId,
       },
       select: {
         id: true,
@@ -75,8 +57,9 @@ export class NoteService {
     });
   }
 
-  async listNotes() {
+  async listNotes(userId: string) {
     return this.prisma.note.findMany({
+      where: { userId },
       orderBy: { createdAt: 'desc' },
       select: {
         id: true,
@@ -87,9 +70,9 @@ export class NoteService {
     });
   }
 
-  async getRenderedHtml(id: string) {
-    const note = await this.prisma.note.findUnique({
-      where: { id },
+  async getRenderedHtml(userId: string, id: string) {
+    const note = await this.prisma.note.findFirst({
+      where: { id, userId },
       select: {
         id: true,
         title: true,
