@@ -10,6 +10,7 @@ Commit and push this repo to GitHub (or GitLab / Bitbucket).
 2. Import the repository
 3. Framework Preset: **Other** (build uses `vercel.json`)
 4. Root Directory: `.` (project root)
+5. **Output Directory:** leave empty or set to `public` (must match `vercel.json`; the `public/` folder is required by Vercel even though all routes rewrite to the Nest API)
 
 ## 3. Environment variables
 
