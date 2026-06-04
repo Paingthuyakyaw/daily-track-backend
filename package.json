@@ -44,6 +44,14 @@
     "node": ">=20"
   },
   "packageManager": "pnpm@10.11.1",
+  "pnpm": {
+    "onlyBuiltDependencies": [
+      "prisma",
+      "@prisma/engines",
+      "@nestjs/core",
+      "esbuild"
+    ]
+  },
   "devDependencies": {
     "@vercel/node": "^5.0.0",
     "@eslint/eslintrc": "^3.2.0",
