@@ -35,7 +35,7 @@ Click **Deploy**. Build steps:
 
 - `pnpm install` (+ `postinstall` → `prisma generate`)
 - `prisma migrate deploy`
-- `tsc` compile (faster than `nest build` on Vercel)
+- `nest build` (resolves `src/` imports to relative paths in `dist/`)
 - deploy `public/` + serverless `api/index.ts`
 
 ## 5. URLs
