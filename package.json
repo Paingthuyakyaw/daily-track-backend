@@ -12,7 +12,7 @@
     "start:dev": "nest start --watch",
     "start:debug": "nest start --debug --watch",
     "start:prod": "node dist/src/main",
-    "vercel-build": "prisma migrate deploy && echo '=== compile start ===' && tsc -p tsconfig.build.json && echo '=== compile done ===' && test -f dist/src/bootstrap.js",
+    "vercel-build": "prisma migrate deploy && echo '=== compile start ===' && tsc -p tsconfig.build.json && echo '=== compile done ===' && test -f dist/src/bootstrap.js && node scripts/ensure-public.js",
     "postinstall": "prisma generate",
     "lint": "eslint \"{src,apps,libs,test}/**/*.ts\" --fix",
     "test": "jest",
